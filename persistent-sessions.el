@@ -36,7 +36,7 @@
     (extended-command-history . "extended-command-history.el")
     (helm-external-command-history . "helm-external-command-history.el")
     (helm-surfraw-engines-history . "helm-surfraw-engines-history.el")
-    (psession--save-buffers-alist . "tv-save-buffers-alist.el")
+    (psession--save-buffers-alist . "psession-save-buffers-alist.el")
     (helm-ff-history . "helm-ff-history.el")
     (helm-grep-history . "helm-grep-history.el")
     (kill-ring . "kill-ring.el")
@@ -44,7 +44,8 @@
     (register-alist . "register-alist.el")
     (psession--winconf-alist . "psession-winconf-alist.el"))
   "Alist of vars to save persistently.
-It is composed of (var_name . \"var_name.el\")"
+It is composed of (var_name . \"var_name.el\").
+Where \"var_name.el\" is the file where to save value of 'var_name."
   :group 'psession
   :type '(alist :key-type symbol :value-type string))
 
