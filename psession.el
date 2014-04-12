@@ -1,6 +1,10 @@
-;;; persistent-sessions.el --- Persistent save of elisp objects. -*- lexical-binding: t -*-
+;;; psession.el --- Persistent save of elisp objects. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2012 ~ 2013 Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Author: Thierry Volpiatto <thierry.volpiatto@gmail.com>
+;; Copyright (C) 2010~2014 Thierry Volpiatto, all rights reserved.
+;; X-URL: https://github.com/thierryvolpiatto/psession
+
+;; Compatibility: GNU Emacs 24.1+
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -209,6 +213,6 @@ That may not work with Emacs versions <=23.1 for hash tables."
       (remove-hook 'emacs-startup-hook 'psession-restore-last-winconf)))
 
 
-(provide 'persistent-sessions)
+(provide 'psession)
 
 ;;; persistent-sessions.el ends here
