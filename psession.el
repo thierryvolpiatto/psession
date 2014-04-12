@@ -216,4 +216,4 @@ That may not work with Emacs versions <=23.1 for hash tables."
 
 (provide 'psession)
 
-;;; persistent-sessions.el ends here
+;;; psession.el ends here
