@@ -5,7 +5,7 @@
 ;; X-URL: https://github.com/thierryvolpiatto/psession
 
 ;; Compatibility: GNU Emacs 24.1+
-;; Package-Requires: ((emacs "24"))
+;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -70,8 +70,8 @@ FILE must be an elisp file with ext \"*.el\" (NOT \"*.elc\").
 Loading the *.elc file will restitute object.
 That may not work with Emacs versions <=23.1 for hash tables."
   (require 'cl-lib) ; Be sure we use the CL version of `eval-when-compile'.
-  (assert (not (file-exists-p file)) nil
-          (format "dump-object-to-file: File `%s' already exists, please remove it." file))
+  (cl-assert (not (file-exists-p file)) nil
+             (format "dump-object-to-file: File `%s' already exists, please remove it." file))
   (unwind-protect
        (let ((print-length           nil)
              (print-level            nil)
@@ -122,7 +122,7 @@ That may not work with Emacs versions <=23.1 for hash tables."
 (defvar psession--winconf-alist nil)
 (defun psession--window-name ()
   (let (result)
-    (walk-windows (lambda (w) (pushnew (buffer-name (window-buffer w)) result)))
+    (walk-windows (lambda (w) (cl-pushnew (buffer-name (window-buffer w)) result)))
     (mapconcat 'identity result " | ")))
 
 ;;;###autoload
