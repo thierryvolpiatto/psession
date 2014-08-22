@@ -76,7 +76,6 @@ That may not work with Emacs versions <=23.1 for hash tables."
        (let ((print-length           nil)
              (print-level            nil)
              (print-circle           t)
-             (print-escape-newlines  t)
              (print-escape-nonascii  t)
              (print-escape-multibyte t))
          (with-temp-file file
