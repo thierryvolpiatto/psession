@@ -91,19 +91,26 @@ That may not work with Emacs versions <=23.1 for hash tables."
   (when psession-object-to-save-alist
     (cl-loop for (o . f) in psession-object-to-save-alist
              for abs = (expand-file-name f psession-elisp-objects-default-directory)
-             ;; Registers are treated specially.
-             if (and (eq o 'register-alist)
+             ;; Registers and kill-ring are treated specially.
+             do
+             (cond ((and (eq o 'register-alist)
                      (symbol-value o))
-             do (psession--dump-object-save-register-alist f)
-             else do
-             ;; Don't dump object when it is nil or not bound.
-             (when (and (boundp o) (symbol-value o))
-               (psession--dump-object-to-file o abs)))))
+                    (psession--dump-object-save-register-alist f))
+                   ((and (memq o '(kill-ring kill-ring-yank-pointer))
+                         (symbol-value o))
+                    (psession--dump-object-no-properties o abs))
+                   ((and (boundp o) (symbol-value o))
+                    (psession--dump-object-to-file o abs))))))
 
 (cl-defun psession--restore-objects-from-directory
     (&optional (dir psession-elisp-objects-default-directory))
   (let ((file-list (cddr (directory-files dir t))))
     (cl-loop for file in file-list do (and file (load file)))))
+
+(defun psession--dump-object-no-properties (object file)
+  (set object (cl-loop for str in (symbol-value object)
+                       collect (substring-no-properties str)))
+  (psession--dump-object-to-file object file))
 
 (cl-defun psession--dump-object-save-register-alist (&optional (file "register-alist.el"))
   "Save `register-alist' but only supported objects."
