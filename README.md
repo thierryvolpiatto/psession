@@ -25,7 +25,7 @@ Customize at least `psession-object-to-save-alist`.
 Add to init file:
 
 ```elisp
-(autoload 'psession-mode "persistent-sessions.el")
+(autoload 'psession-mode "psession.el")
 (psession-mode 1)
 ```
 
