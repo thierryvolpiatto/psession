@@ -18,7 +18,7 @@ All objects are saved individually in compiled files.
 
 #Install:
 
-Add "persistent-sessions.el" to `load-path`
+Add "psession.el" to `load-path`
 
 Customize at least `psession-object-to-save-alist`.
 
