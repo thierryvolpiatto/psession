@@ -148,8 +148,9 @@ That may not work with Emacs versions <=23.1 for hash tables."
   (interactive (list (completing-read
                       "WinConfig: "
                       (sort (mapcar 'car psession--winconf-alist) #'string-lessp))))
-  (delete-other-windows)
-  (window-state-put (cdr (assoc conf psession--winconf-alist))))
+  (with-selected-frame (last-nonminibuffer-frame)
+    (delete-other-windows)
+    (window-state-put (cdr (assoc conf psession--winconf-alist)))))
 
 ;;;###autoload
 (defun psession-delete-winconf (conf)
@@ -163,7 +164,9 @@ That may not work with Emacs versions <=23.1 for hash tables."
   (psession-save-winconf psession--last-winconf))
 
 (defun psession-restore-last-winconf ()
-  (psession-restore-winconf psession--last-winconf))
+  (run-with-idle-timer
+   0.01 nil (lambda ()
+             (psession-restore-winconf psession--last-winconf))))
 
 ;;; Persistents-buffer 
 ;;
