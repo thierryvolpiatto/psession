@@ -104,7 +104,7 @@ That may not work with Emacs versions <=23.1 for hash tables."
 
 (cl-defun psession--restore-objects-from-directory
     (&optional (dir psession-elisp-objects-default-directory))
-  (let ((file-list (cddr (directory-files dir t))))
+  (let ((file-list (directory-files dir t directory-files-no-dot-files-regexp)))
     (cl-loop for file in file-list do (and file (load file)))))
 
 (defun psession--dump-object-no-properties (object file)
