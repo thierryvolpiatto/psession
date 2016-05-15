@@ -134,6 +134,8 @@ That may not work with Emacs versions <=23.1 for hash tables."
 
 ;;;###autoload
 (defun psession-save-winconf (place)
+  "Save persistently current window config to PLACE.
+Arg PLACE is the key of an entry in `psession--winconf-alist'."
   (interactive (list (let ((name (psession--window-name)))
                        (read-string (format "Place (%s) : " name) nil nil name))))
   (let ((assoc (assoc place psession--winconf-alist))
@@ -150,6 +152,8 @@ That may not work with Emacs versions <=23.1 for hash tables."
 
 ;;;###autoload
 (defun psession-restore-winconf (conf)
+  "Restore window config CONF.
+Arg CONF is an entry in `psession--winconf-alist'."
   (interactive (list (completing-read
                       "WinConfig: "
                       (sort (mapcar 'car psession--winconf-alist) #'string-lessp))))
@@ -157,6 +161,7 @@ That may not work with Emacs versions <=23.1 for hash tables."
 
 ;;;###autoload
 (defun psession-delete-winconf (conf)
+  "Delete window config CONF from `psession--winconf-alist'."
   (interactive (list (completing-read
                       "WinConfig: "
                       (sort (mapcar 'car psession--winconf-alist) #'string-lessp))))
