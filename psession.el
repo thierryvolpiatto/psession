@@ -31,7 +31,8 @@
   "Persistent sessions."
   :group 'frames)
 
-(defcustom psession-elisp-objects-default-directory "~/.emacs.d/elisp-objects/"
+(defcustom psession-elisp-objects-default-directory
+  (locate-user-emacs-file "elisp-objects/")
   "The directory where lisp objects will be stored."
   :group 'psession
   :type 'string)
