@@ -23,8 +23,8 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'dired)
-                   (require 'cl-lib))
+(require 'dired)
+(eval-when-compile (require 'cl-lib))
 
 
 (defgroup psession nil
