@@ -5,7 +5,7 @@
 ;; X-URL: https://github.com/thierryvolpiatto/psession
 
 ;; Compatibility: GNU Emacs 24.1+
-;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
+;; Package-Requires: ((emacs "24") (cl-lib "0.5") (async "1.9.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,8 +23,10 @@
 
 ;;; Code:
 
-(require 'dired)
 (eval-when-compile (require 'cl-lib))
+(require 'async)
+
+(defvar dired-buffers)
 
 
 (defgroup psession nil
@@ -59,6 +61,20 @@ Where \"var_name.el\" is the file where to save value of 'var_name."
   "Regexp matching buffers you don't want to save."
   :group 'psession
   :type 'string)
+
+(defcustom psession-auto-save-delay 300
+  "Delay in seconds to auto-save emacs session."
+  :group 'psession
+  :type 'integer)
+
+(defcustom psession-auto-save nil
+  "Enable auto-saving session when non nil.
+
+Session is saved all the `psession-auto-save-delay' seconds.
+Auto saving is done asynchronously."
+  :group 'psession
+  :type 'boolean)
+
 
 ;;; The main function to save objects to byte compiled file.
 ;;
@@ -181,6 +197,7 @@ Arg CONF is an entry in `psession--winconf-alist'."
 ;;
 ;;
 (defun psession--save-some-buffers ()
+  (require 'dired)
   (cl-loop with dired-blist = (cl-loop for (_f . b) in dired-buffers
                                        when (buffer-name b)
                                        collect b)
@@ -210,6 +227,39 @@ Arg CONF is an entry in `psession--winconf-alist'."
                (push-mark p 'nomsg)
                (progress-reporter-update progress-reporter count)))
     (progress-reporter-done progress-reporter)))
+
+(defun psession-save-all-async ()
+  (message "Psession: auto saving session...")
+  (psession-save-last-winconf)
+  (psession--dump-some-buffers-to-list)
+  (async-start
+   `(lambda ()
+      (add-to-list 'load-path
+                   ,(file-name-directory (locate-library "psession")))
+      (require 'psession)
+      ,(async-inject-variables "\\`\\(psession\\)-.*")
+      (psession--dump-object-to-file-save-alist))
+   (lambda (_result)
+     (message "Psession: auto saving session done"))))
+
+(defun psession-save-all ()
+  (interactive)
+  (psession-save-last-winconf)
+  (psession--dump-some-buffers-to-list)
+  (psession--dump-object-to-file-save-alist))
+
+(defvar psession--auto-save-timer nil)
+(defun psession-start-auto-save ()
+  (setq psession--auto-save-timer
+        (run-with-idle-timer
+         psession-auto-save-delay t #'psession-save-all-async)))
+
+(defun psession-auto-save-cancel-timer ()
+  (interactive)
+  (when psession--auto-save-timer
+    (cancel-timer psession--auto-save-timer)
+    (setq psession--auto-save-timer nil)))
+
 
 ;;;###autoload
 (define-minor-mode psession-mode
@@ -219,18 +269,21 @@ Arg CONF is an entry in `psession--winconf-alist'."
       (progn
         (unless (file-directory-p psession-elisp-objects-default-directory)
           (make-directory psession-elisp-objects-default-directory t))
+        (and psession-auto-save (psession-start-auto-save))
         (add-hook 'kill-emacs-hook 'psession--dump-object-to-file-save-alist)
         (add-hook 'emacs-startup-hook 'psession--restore-objects-from-directory)
         (add-hook 'kill-emacs-hook 'psession--dump-some-buffers-to-list)
         (add-hook 'emacs-startup-hook 'psession--restore-some-buffers 'append)
         (add-hook 'kill-emacs-hook 'psession-save-last-winconf)
-        (add-hook 'emacs-startup-hook 'psession-restore-last-winconf 'append))
-      (remove-hook 'kill-emacs-hook 'psession--dump-object-to-file-save-alist)
-      (remove-hook 'emacs-startup-hook 'psession--restore-objects-from-directory)
-      (remove-hook 'kill-emacs-hook 'psession--dump-some-buffers-to-list)
-      (remove-hook 'emacs-startup-hook 'psession--restore-some-buffers)
-      (remove-hook 'kill-emacs-hook 'psession-save-last-winconf)
-      (remove-hook 'emacs-startup-hook 'psession-restore-last-winconf)))
+        (add-hook 'emacs-startup-hook 'psession-restore-last-winconf 'append)
+        (add-hook 'kill-emacs-hook 'psession-auto-save-cancel-timer))
+    (psession-auto-save-cancel-timer)
+    (remove-hook 'kill-emacs-hook 'psession--dump-object-to-file-save-alist)
+    (remove-hook 'emacs-startup-hook 'psession--restore-objects-from-directory)
+    (remove-hook 'kill-emacs-hook 'psession--dump-some-buffers-to-list)
+    (remove-hook 'emacs-startup-hook 'psession--restore-some-buffers)
+    (remove-hook 'kill-emacs-hook 'psession-save-last-winconf)
+    (remove-hook 'emacs-startup-hook 'psession-restore-last-winconf)))
 
 
 (provide 'psession)

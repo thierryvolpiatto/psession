@@ -19,6 +19,10 @@ All objects are saved individually in compiled files.
 - Save and restore registers except windows register
   (you can save your windows configs though with M-x psession-save-winconf)
 
+Saving is done when quitting emacs (run in kill-emacs-hook), however you can save at regular time 
+with `psession-auto-save` set to a non nil value if you want to have your session saved 
+with your recentest changes in case emacs crashes.
+
 # Install:
 
 Add "psession.el" to `load-path` (not needed when installed from Emacs packaging system)
