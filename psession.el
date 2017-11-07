@@ -5,7 +5,7 @@
 ;; X-URL: https://github.com/thierryvolpiatto/psession
 
 ;; Compatibility: GNU Emacs 24.1+
-;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
+;; Package-Requires: ((emacs "24") (cl-lib "0.5") (async "1.9.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,8 +23,10 @@
 
 ;;; Code:
 
-(require 'dired)
 (eval-when-compile (require 'cl-lib))
+(require 'async)
+
+(defvar dired-buffers)
 
 
 (defgroup psession nil
@@ -60,7 +62,7 @@ Where \"var_name.el\" is the file where to save value of 'var_name."
   :group 'psession
   :type 'string)
 
-(defcustom psession-auto-save-delay 12
+(defcustom psession-auto-save-delay 300
   "Delay in seconds to auto-save emacs session."
   :group 'psession
   :type 'integer)
@@ -195,6 +197,7 @@ Arg CONF is an entry in `psession--winconf-alist'."
 ;;
 ;;
 (defun psession--save-some-buffers ()
+  (require 'dired)
   (cl-loop with dired-blist = (cl-loop for (_f . b) in dired-buffers
                                        when (buffer-name b)
                                        collect b)
@@ -226,7 +229,6 @@ Arg CONF is an entry in `psession--winconf-alist'."
     (progress-reporter-done progress-reporter)))
 
 (defun psession-save-all-async ()
-  (require 'async)
   (message "Psession: auto saving session...")
   (psession-save-last-winconf)
   (psession--dump-some-buffers-to-list)
