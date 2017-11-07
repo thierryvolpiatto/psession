@@ -226,6 +226,7 @@ Arg CONF is an entry in `psession--winconf-alist'."
     (progress-reporter-done progress-reporter)))
 
 (defun psession-save-all-async ()
+  (require 'async)
   (message "Psession: auto saving session...")
   (psession-save-last-winconf)
   (psession--dump-some-buffers-to-list)
