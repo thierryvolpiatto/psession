@@ -67,7 +67,7 @@ Where \"var_name.el\" is the file where to save value of 'var_name."
   :group 'psession
   :type 'integer)
 
-(defcustom psession-auto-save t
+(defcustom psession-auto-save nil
   "Enable auto-saving session when non nil.
 
 Session is saved all the `psession-auto-save-delay' seconds.
