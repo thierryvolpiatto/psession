@@ -228,6 +228,10 @@ Arg CONF is an entry in `psession--winconf-alist'."
                (progress-reporter-update progress-reporter count)))
     (progress-reporter-done progress-reporter)))
 
+(defun psession--get-variables-regexp ()
+  (regexp-opt (cl-loop for (k . _v) in psession-object-to-save-alist
+                       collect (symbol-name k))))
+
 (defun psession-save-all-async ()
   (message "Psession: auto saving session...")
   (psession-save-last-winconf)
@@ -237,7 +241,7 @@ Arg CONF is an entry in `psession--winconf-alist'."
       (add-to-list 'load-path
                    ,(file-name-directory (locate-library "psession")))
       (require 'psession)
-      ,(async-inject-variables "\\`\\(psession\\)-.*")
+      ,(async-inject-variables (format "\\`%s" (psession--get-variables-regexp)))
       (psession--dump-object-to-file-save-alist))
    (lambda (_result)
      (message "Psession: auto saving session done"))))
