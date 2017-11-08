@@ -228,11 +228,15 @@ Arg CONF is an entry in `psession--winconf-alist'."
                (progress-reporter-update progress-reporter count)))
     (progress-reporter-done progress-reporter)))
 
+
+;;; Auto saving psession
+;;
 (defun psession--get-variables-regexp ()
   (regexp-opt (cl-loop for (k . _v) in psession-object-to-save-alist
                        collect (symbol-name k))))
 
 (defun psession-save-all-async ()
+  "Save current emacs session asynchronously."
   (message "Psession: auto saving session...")
   (psession-save-last-winconf)
   (psession--dump-some-buffers-to-list)
@@ -247,6 +251,7 @@ Arg CONF is an entry in `psession--winconf-alist'."
      (message "Psession: auto saving session done"))))
 
 (defun psession-save-all ()
+  "Save current emacs session."
   (interactive)
   (psession-save-last-winconf)
   (psession--dump-some-buffers-to-list)
@@ -254,11 +259,13 @@ Arg CONF is an entry in `psession--winconf-alist'."
 
 (defvar psession--auto-save-timer nil)
 (defun psession-start-auto-save ()
+  "Start auto-saving emacs session in background."
   (setq psession--auto-save-timer
         (run-with-idle-timer
          psession-auto-save-delay t #'psession-save-all-async)))
 
 (defun psession-auto-save-cancel-timer ()
+  "Cancel psession auto-saving."
   (interactive)
   (when psession--auto-save-timer
     (cancel-timer psession--auto-save-timer)
