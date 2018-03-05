@@ -218,7 +218,6 @@ Arg CONF is an entry in `psession--winconf-alist'."
 
 (defun psession--restore-some-buffers ()
   (let* ((max (length psession--save-buffers-alist))
-         file-name-handler-alist
          (progress-reporter (make-progress-reporter "Restoring buffers..." 0 max)))
     (cl-loop for (f . p) in psession--save-buffers-alist
              for count from 0
