@@ -206,7 +206,9 @@ Arg CONF is an entry in `psession--winconf-alist'."
            for buf-fname = (or (buffer-file-name b) (car (rassoc b dired-buffers)))
            for place = (with-current-buffer b (point))
            when (and buf-fname
-                     (not (string-match tramp-file-name-regexp buf-fname))
+                     (not (or (file-remote-p buf-fname)
+                              (and (fboundp 'tramp-archive-file-name-p)
+                                   (tramp-archive-file-name-p buf-fname))))
                      (not (string-match  psession-save-buffers-unwanted-buffers-regexp
                                          buf-fname))
                      (file-exists-p buf-fname))
