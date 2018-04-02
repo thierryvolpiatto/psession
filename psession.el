@@ -39,20 +39,25 @@
   :type 'string)
 
 (defcustom psession-object-to-save-alist
-  '((ioccur-history . "ioccur-history.el")
-    (extended-command-history . "extended-command-history.el")
+  '((extended-command-history . "extended-command-history.el")
     (helm-external-command-history . "helm-external-command-history.el")
     (helm-surfraw-engines-history . "helm-surfraw-engines-history.el")
     (psession--save-buffers-alist . "psession-save-buffers-alist.el")
     (helm-ff-history . "helm-ff-history.el")
-    (helm-grep-history . "helm-grep-history.el")
+    (regexp-search-ring . "regexp-search-ring.el")
+    (search-ring . "search-ring.el")
+    (file-name-history . "file-name-history.el")
     (kill-ring . "kill-ring.el")
     (kill-ring-yank-pointer . "kill-ring-yank-pointer.el")
     (register-alist . "register-alist.el")
     (psession--winconf-alist . "psession-winconf-alist.el"))
   "Alist of vars to save persistently.
 It is composed of (var_name . \"var_name.el\").
-Where \"var_name.el\" is the file where to save value of 'var_name."
+Where \"var_name.el\" is the file where to save value of 'var_name.
+
+These variables are saved when `psession-mode' is enabled, you don't
+have to add here the `minibuffer-history' variables, instead enable
+`psession-savehist-mode' as a replacement of `savehist-mode'."
   :group 'psession
   :type '(alist :key-type symbol :value-type string))
 
@@ -74,6 +79,10 @@ Auto saving is done asynchronously."
   :group 'psession
   :type 'boolean)
 
+(defcustom psession-savehist-ignored-variables nil
+  "List of `minibuffer-history' variables to not save."
+  :group 'psession
+  :type '(repeat symbol))
 
 ;;; The main function to save objects to byte compiled file.
 ;;
@@ -230,7 +239,22 @@ Arg CONF is an entry in `psession--winconf-alist'."
                (progress-reporter-update progress-reporter count)))
     (progress-reporter-done progress-reporter)))
 
+(defun psession-savehist-hook ()
+  (unless (or (eq minibuffer-history-variable t)
+              (memq minibuffer-history-variable psession-savehist-ignored-variables))
+    (cl-pushnew (cons minibuffer-history-variable
+                      (concat (symbol-name minibuffer-history-variable) ".el"))
+                psession-object-to-save-alist
+                :test 'equal)))
 
+;;;###autoloads
+(define-minor-mode psession-savehist-mode
+    "Save minibuffer-history variables persistently."
+  :global t
+  (if psession-savehist-mode
+      (add-hook 'minibuffer-setup-hook 'psession-savehist-hook)
+    (remove-hook 'minibuffer-setup-hook 'psession-savehist-hook)))
+
 ;;;###autoload
 (define-minor-mode psession-mode
     "Persistent emacs sessions."
