@@ -120,7 +120,7 @@ That may not work with Emacs versions <=23.1 for hash tables."
              ;; Registers and kill-ring are treated specially.
              do
              (cond ((and (eq o 'register-alist)
-                     (symbol-value o))
+                         (symbol-value o))
                     (psession--dump-object-save-register-alist f))
                    ((and (boundp o) (symbol-value o))
                     (psession--dump-object-no-properties o abs))))))
@@ -131,11 +131,16 @@ That may not work with Emacs versions <=23.1 for hash tables."
     (cl-loop for file in file-list do (and file (load file)))))
 
 (defun psession--dump-object-no-properties (object file)
-  (set object (cl-loop for str in (symbol-value object)
-                       if (stringp str)
-                       collect (substring-no-properties str)
-                       else collect str))
-  (psession--dump-object-to-file object file))
+  (let ((value (symbol-value object)))
+    (set object (cond ((stringp value)
+                       (substring-no-properties value))
+                      ((listp value)
+                       (cl-loop for elm in value
+                                if (stringp elm)
+                                collect (substring-no-properties elm)
+                                else collect elm))
+                      (t value)))
+    (psession--dump-object-to-file object file)))
 
 (cl-defun psession--dump-object-save-register-alist (&optional (file "register-alist.el"))
   "Save `register-alist' but only supported objects."
