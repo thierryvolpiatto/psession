@@ -277,7 +277,8 @@ Arg CONF is an entry in `psession--winconf-alist'."
       (add-to-list 'load-path
                    ,(file-name-directory (locate-library "psession")))
       (require 'psession)
-      ,(async-inject-variables (format "\\`%s" (psession--get-variables-regexp)))
+      ,(async-inject-variables (format "\\`%s" (psession--get-variables-regexp))
+                               nil nil t)
       (psession--dump-object-to-file-save-alist))
    (lambda (_result)
      (message "Psession: auto saving session done"))))
