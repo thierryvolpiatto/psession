@@ -113,7 +113,7 @@ That may not work with Emacs versions <=23.1 for hash tables."
 ;;; Objects (variables to save)
 ;;
 ;;
-(defun psession--dump-object-to-file-save-alist ()
+(defun psession--dump-object-to-file-save-alist (&optional skip-props)
   (when psession-object-to-save-alist
     (cl-loop for (o . f) in psession-object-to-save-alist
              for abs = (expand-file-name f psession-elisp-objects-default-directory)
@@ -121,28 +121,30 @@ That may not work with Emacs versions <=23.1 for hash tables."
              do
              (cond ((and (eq o 'register-alist)
                          (symbol-value o))
-                    (psession--dump-object-save-register-alist f))
+                    (psession--dump-object-save-register-alist f skip-props))
                    ((and (boundp o) (symbol-value o))
-                    (psession--dump-object-no-properties o abs))))))
+                    (psession--dump-object-no-properties o abs skip-props))))))
 
 (cl-defun psession--restore-objects-from-directory
     (&optional (dir psession-elisp-objects-default-directory))
   (let ((file-list (directory-files dir t directory-files-no-dot-files-regexp)))
     (cl-loop for file in file-list do (and file (load file)))))
 
-(defun psession--dump-object-no-properties (object file)
+(defun psession--dump-object-no-properties (object file &optional skip-props)
+  ;; Force not checking properties with SKIP-PROPS.
   (let ((value (symbol-value object)))
-    (set object (cond ((stringp value)
-                       (substring-no-properties value))
-                      ((listp value)
-                       (cl-loop for elm in value
-                                if (stringp elm)
-                                collect (substring-no-properties elm)
-                                else collect elm))
-                      (t value)))
+    (unless skip-props
+      (set object (cond ((stringp value)
+                         (substring-no-properties value))
+                        ((listp value)
+                         (cl-loop for elm in value
+                                  if (stringp elm)
+                                  collect (substring-no-properties elm)
+                                  else collect elm))
+                        (t value))))
     (psession--dump-object-to-file object file)))
 
-(cl-defun psession--dump-object-save-register-alist (&optional (file "register-alist.el"))
+(cl-defun psession--dump-object-save-register-alist (&optional (file "register-alist.el") skip-props)
   "Save `register-alist' but only supported objects."
   (let ((register-alist (cl-loop for (char . val) in register-alist
                                  unless (or (markerp val)
@@ -152,7 +154,7 @@ That may not work with Emacs versions <=23.1 for hash tables."
                                                         (substring-no-properties val)
                                                       val))))
         (def-file (expand-file-name file psession-elisp-objects-default-directory)))
-    (psession--dump-object-no-properties 'register-alist def-file)))
+    (psession--dump-object-no-properties 'register-alist def-file skip-props)))
 
 ;;; Persistents window configs
 ;;
@@ -277,9 +279,11 @@ Arg CONF is an entry in `psession--winconf-alist'."
       (add-to-list 'load-path
                    ,(file-name-directory (locate-library "psession")))
       (require 'psession)
+      ;; Inject variables without properties.
       ,(async-inject-variables (format "\\`%s" (psession--get-variables-regexp))
-                               nil nil t)
-      (psession--dump-object-to-file-save-alist))
+                               nil nil 'noprops)
+      ;; No need to treat properties here it is already done.
+      (psession--dump-object-to-file-save-alist 'skip-props))
    (lambda (_result)
      (message "Psession: auto saving session done"))))
 
