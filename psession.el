@@ -255,7 +255,7 @@ Arg CONF is an entry in `psession--winconf-alist'."
                 psession-object-to-save-alist
                 :test 'equal)))
 
-;;;###autoloads
+;;;###autoload
 (define-minor-mode psession-savehist-mode
     "Save minibuffer-history variables persistently."
   :global t
