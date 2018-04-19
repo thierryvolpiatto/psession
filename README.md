@@ -43,4 +43,4 @@ Otherwise (Melpa install) only `(psession-mode 1)` is needed.
 
 For saving minibuffer history, use `(psession-savehist-mode 1)` as a replacement of `savehist-mode`.
 
-If you want to save periodically (autosave) your emacs session, add `(setq psession-auto-save t)` to your init file.
+If you want to save periodically (autosave) your emacs session, add `(psession-autosave-mode 1)` to your init file.

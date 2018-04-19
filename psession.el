@@ -72,14 +72,6 @@ have to add here the `minibuffer-history' variables, instead enable
   :group 'psession
   :type 'integer)
 
-(defcustom psession-auto-save nil
-  "Enable auto-saving session when non nil.
-
-Session is saved all the `psession-auto-save-delay' seconds.
-Auto saving is done asynchronously."
-  :group 'psession
-  :type 'boolean)
-
 (defcustom psession-savehist-ignored-variables nil
   "List of `minibuffer-history' variables to not save."
   :group 'psession
@@ -303,10 +295,17 @@ Arg CONF is an entry in `psession--winconf-alist'."
 
 (defun psession-auto-save-cancel-timer ()
   "Cancel psession auto-saving."
-  (interactive)
   (when psession--auto-save-timer
     (cancel-timer psession--auto-save-timer)
     (setq psession--auto-save-timer nil)))
+
+;;;###autoload
+(define-minor-mode psession-autosave-mode
+    "Auto save emacs session when enabled."
+  :global t
+  (if psession-autosave-mode
+      (psession-start-auto-save)
+    (psession-auto-save-cancel-timer)))
 
 ;;;###autoload
 (define-minor-mode psession-mode
@@ -316,7 +315,6 @@ Arg CONF is an entry in `psession--winconf-alist'."
       (progn
         (unless (file-directory-p psession-elisp-objects-default-directory)
           (make-directory psession-elisp-objects-default-directory t))
-        (and psession-auto-save (psession-start-auto-save))
         (add-hook 'kill-emacs-hook 'psession--dump-object-to-file-save-alist)
         (add-hook 'emacs-startup-hook 'psession--restore-objects-from-directory)
         (add-hook 'kill-emacs-hook 'psession--dump-some-buffers-to-list)
@@ -324,7 +322,6 @@ Arg CONF is an entry in `psession--winconf-alist'."
         (add-hook 'kill-emacs-hook 'psession-save-last-winconf)
         (add-hook 'emacs-startup-hook 'psession-restore-last-winconf 'append)
         (add-hook 'kill-emacs-hook 'psession-auto-save-cancel-timer))
-    (psession-auto-save-cancel-timer)
     (remove-hook 'kill-emacs-hook 'psession--dump-object-to-file-save-alist)
     (remove-hook 'emacs-startup-hook 'psession--restore-objects-from-directory)
     (remove-hook 'kill-emacs-hook 'psession--dump-some-buffers-to-list)
