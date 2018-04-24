@@ -279,13 +279,6 @@ Arg CONF is an entry in `psession--winconf-alist'."
    (lambda (_result)
      (message "Psession: auto saving session done"))))
 
-(defun psession-save-all ()
-  "Save current emacs session."
-  (interactive)
-  (psession-save-last-winconf)
-  (psession--dump-some-buffers-to-list)
-  (psession--dump-object-to-file-save-alist))
-
 (defvar psession--auto-save-timer nil)
 (defun psession-start-auto-save ()
   "Start auto-saving emacs session in background."
