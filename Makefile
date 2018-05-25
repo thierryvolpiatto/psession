@@ -76,6 +76,7 @@ PREFIX=/usr/local/share/
 DESTDIR=${PREFIX}emacs/site-lisp/psession/
 install:
 	test -d ${DESTDIR} || mkdir ${DESTDIR}
+	cp -vf *.el $(DESTDIR)
 	cp -vf *.elc $(DESTDIR)
 	cp -vf psession-autoloads.el $(DESTDIR)
 
