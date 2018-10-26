@@ -97,6 +97,9 @@ That may not work with Emacs versions <=23.1 for hash tables."
              (print-escape-nonascii  t)
              (print-escape-multibyte t))
          (with-temp-file file
+           ;; OBJ may not have been defined yet because package
+           ;; handling is not already loaded, so declare it right now.
+           (prin1 `(defvar ,obj nil) (current-buffer))
            (prin1 `(setq ,obj (eval-when-compile ,obj)) (current-buffer)))
          (byte-compile-file file)
          (message "`%s' dumped to %sc" obj file))
