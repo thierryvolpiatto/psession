@@ -195,7 +195,8 @@ Arg CONF is an entry in `psession--winconf-alist'."
     (setq psession--winconf-alist (delete assoc psession--winconf-alist))))
 
 (defun psession-save-last-winconf ()
-  (psession-save-winconf psession--last-winconf))
+  (unless (and (boundp 'helm-alive-p) helm-alive-p)
+    (psession-save-winconf psession--last-winconf)))
 
 (defun psession-restore-last-winconf ()
   (run-with-idle-timer
