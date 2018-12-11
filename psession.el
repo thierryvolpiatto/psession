@@ -172,9 +172,12 @@ Arg PLACE is the key of an entry in `psession--winconf-alist'."
         (setq psession--winconf-alist (append new-conf psession--winconf-alist)))))
 
 (defun psession--restore-winconf-1 (conf &optional window ignore)
-  (with-selected-frame (last-nonminibuffer-frame)
-    (delete-other-windows)
-    (window-state-put (cdr (assoc conf psession--winconf-alist)) window ignore)))
+  (let ((winconf (assoc conf psession--winconf-alist)))
+    (if winconf
+        (with-selected-frame (last-nonminibuffer-frame)
+          (delete-other-windows)
+          (window-state-put (cdr (assoc conf psession--winconf-alist)) window ignore))
+      (user-error "Psession: Invalid window configuration `%s'" conf))))
 
 ;;;###autoload
 (defun psession-restore-winconf (conf)
