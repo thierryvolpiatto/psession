@@ -232,16 +232,17 @@ Arg CONF is an entry in `psession--winconf-alist'."
   (setq psession--save-buffers-alist (psession--save-some-buffers)))
 
 (defun psession--restore-some-buffers ()
-  (let* ((max (length psession--save-buffers-alist))
-         (progress-reporter (make-progress-reporter "Restoring buffers..." 0 max)))
-    (cl-loop for (f . p) in psession--save-buffers-alist
-             for count from 0
-             do
-             (with-current-buffer (find-file-noselect f 'nowarn)
-               (goto-char p)
-               (push-mark p 'nomsg)
-               (progress-reporter-update progress-reporter count)))
-    (progress-reporter-done progress-reporter)))
+  (when psession--save-buffers-alist
+    (let* ((max (length psession--save-buffers-alist))
+           (progress-reporter (make-progress-reporter "Restoring buffers..." 0 max)))
+      (cl-loop for (f . p) in psession--save-buffers-alist
+               for count from 0
+               do
+               (with-current-buffer (find-file-noselect f 'nowarn)
+                 (goto-char p)
+                 (push-mark p 'nomsg)
+                 (progress-reporter-update progress-reporter count)))
+      (progress-reporter-done progress-reporter))))
 
 (defun psession-savehist-hook ()
   (unless (or (eq minibuffer-history-variable t)
