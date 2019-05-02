@@ -125,12 +125,12 @@ That may not work with Emacs versions <=23.1 for hash tables."
 (defun psession--purecopy (object)
   (cond ((stringp object)
          (substring-no-properties object))
-        ((listp object)
+        ((consp object)
          (cl-loop for elm in object
                   if (stringp elm)
                   collect (substring-no-properties elm)
                   else
-                  if (and (listp elm) (null (cdr (last elm))))
+                  if (and (consp elm) (null (cdr (last elm))))
                   collect (psession--purecopy elm)
                   else
                   collect elm))
