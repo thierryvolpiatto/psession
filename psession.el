@@ -292,7 +292,6 @@ Arg CONF is an entry in `psession--winconf-alist'."
 (defun psession-save-all-async ()
   "Save current emacs session asynchronously."
   (message "Psession: auto saving session...")
-  (psession-save-last-winconf)
   (psession--dump-some-buffers-to-list)
   (async-start
    `(lambda ()
