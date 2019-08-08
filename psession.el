@@ -45,6 +45,7 @@
     (helm-surfraw-engines-history . "helm-surfraw-engines-history.el")
     (psession--save-buffers-alist . "psession-save-buffers-alist.el")
     (helm-ff-history . "helm-ff-history.el")
+    (helm-browse-project-history . "helm-browse-project-history.el")
     (regexp-search-ring . "regexp-search-ring.el")
     (search-ring . "search-ring.el")
     (file-name-history . "file-name-history.el")
