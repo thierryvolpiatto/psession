@@ -226,9 +226,10 @@ Arg CONF is an entry in `psession--winconf-alist'."
     (psession-save-winconf psession--last-winconf)))
 
 (defun psession-restore-last-winconf ()
-  (run-with-idle-timer
-   0.01 nil (lambda ()
-             (psession--restore-winconf-1 psession--last-winconf nil 'safe))))
+  (when (assoc-default psession--last-winconf psession--winconf-alist)
+    (run-with-idle-timer
+     0.01 nil (lambda ()
+                (psession--restore-winconf-1 psession--last-winconf nil 'safe)))))
 
 ;;; Persistents-buffer 
 ;;
@@ -284,6 +285,7 @@ Arg CONF is an entry in `psession--winconf-alist'."
       (add-hook 'minibuffer-setup-hook 'psession-savehist-hook)
     (remove-hook 'minibuffer-setup-hook 'psession-savehist-hook)))
 
+
 ;;; Auto saving psession
 ;;
 (defun psession--get-variables-regexp ()
