@@ -289,7 +289,13 @@ Arg CONF is an entry in `psession--winconf-alist'."
 ;;; Auto saving psession
 ;;
 (defun psession--get-variables-regexp ()
-  (regexp-opt (cl-loop for (k . _v) in psession-object-to-save-alist
+  (regexp-opt (cl-loop for (k . _v) in
+                       (append psession-object-to-save-alist
+                               (mapcar
+                                'list
+                                '(psession-elisp-objects-default-directory
+                                  psession-savehist-ignored-variables
+                                  psession-save-buffers-unwanted-buffers-regexp)))
                        collect (symbol-name k))))
 
 (defun psession-save-all-async ()
