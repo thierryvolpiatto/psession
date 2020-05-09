@@ -63,7 +63,8 @@ have to add here the `minibuffer-history' variables, instead enable
   :group 'psession
   :type '(alist :key-type symbol :value-type string))
 
-(defcustom psession-save-buffers-unwanted-buffers-regexp ".*[.]org$\\|diary$\\|[.]newsticker-cache$"
+(defcustom psession-save-buffers-unwanted-buffers-regexp
+  ".*[.]org$\\|diary$\\|[.]newsticker-cache$"
   "Regexp matching buffers you don't want to save."
   :group 'psession
   :type 'string)
@@ -77,6 +78,37 @@ have to add here the `minibuffer-history' variables, instead enable
   "List of `minibuffer-history' variables to not save."
   :group 'psession
   :type '(repeat symbol))
+
+
+;;;###autoload
+(defun psession-make-persistent-variable (var &optional save)
+  "Make symbol variable VAR persistent with psession.
+
+Do not make `minibuffer-history' variables persistent from here,
+enable instead `psession-savehist-mode'.
+
+Variable VAR is added to `psession-object-to-save-alist'.
+
+When used interactively or SAVE is non nil, save VAR in
+`psession-object-to-save-alist' with customize.
+
+This function is meant to be used interactively, but
+if called from elisp in e.g. -your init file- you don't need to specify
+SAVE arg."
+  (interactive (list (intern
+                      (completing-read "Make persistent variable: "
+                                       (cl-loop for s being the symbols
+                                                when (boundp s)
+                                                collect s)))
+                     "\np"))
+  (cl-assert (and var (boundp var)))
+  (cl-pushnew (cons var (format "%s.el" var))
+              psession-object-to-save-alist
+              :test 'equal)
+  (when save ; Interactive.
+    (customize-save-variable 'psession-object-to-save-alist
+                             psession-object-to-save-alist)))
+
 
 ;;; The main function to save objects to byte compiled file.
 ;;
