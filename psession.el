@@ -115,10 +115,10 @@ SAVE arg."
 ;; Each object have its own compiled file.
 (defun psession--dump-object-to-file (obj file)
   "Save symbol object OBJ to the byte compiled version of FILE.
-OBJ can be any lisp object, list, hash-table, etc...
-Windows configurations and markers are not supported.
+OBJ can be any Lisp object, list, hash-table, etc...
+Window configurations and markers are not supported.
 FILE must be an elisp file with ext \"*.el\" (NOT \"*.elc\").
-Loading the *.elc file will restitute object.
+Loading the *.elc file will return the object.
 That may not work with Emacs versions <=23.1 for hash tables."
   (require 'cl-lib) ; Be sure we use the CL version of `eval-when-compile'.
   (cl-assert (not (file-exists-p file)) nil
