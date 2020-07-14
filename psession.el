@@ -130,7 +130,7 @@ That may not work with Emacs versions <=23.1 for hash tables."
              (print-escape-nonascii  t)
              (print-escape-multibyte t))
          (with-temp-file file
-           (prin1 `(setq ,obj (eval-when-compile ,obj)) (current-buffer)))
+           (prin1 `(setq-default ,obj (eval-when-compile ,obj)) (current-buffer)))
          (byte-compile-file file)
          (message "`%s' dumped to %sc" obj file))
     (delete-file file)))
