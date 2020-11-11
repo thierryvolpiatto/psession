@@ -69,8 +69,8 @@ clean:
 
 # Make autoloads file
 autoloads:
-	$(EVAL) "(let ((generated-autoload-file (expand-file-name \"psession-autoloads.el\" \"$(PKGDIR)\")) \
-(backup-inhibited t)) (update-directory-autoloads \"$(PKGDIR)\"))"
+	$(EVAL) "(progn (setq generated-autoload-file (expand-file-name \"psession-autoloads.el\" \"$(PKGDIR)\")) \
+(setq backup-inhibited t) (update-directory-autoloads \"$(PKGDIR)\"))"
 
 PREFIX=/usr/local/share/
 DESTDIR=${PREFIX}emacs/site-lisp/psession/
