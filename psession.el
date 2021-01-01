@@ -25,6 +25,7 @@
 
 (eval-when-compile (require 'cl-lib))
 (require 'async)
+(require 'frameset)
 
 (defvar dired-buffers)
 
@@ -52,7 +53,8 @@
     (kill-ring . "kill-ring.el")
     (kill-ring-yank-pointer . "kill-ring-yank-pointer.el")
     (register-alist . "register-alist.el")
-    (psession--winconf-alist . "psession-winconf-alist.el"))
+    (psession--winconf-alist . "psession-winconf-alist.el")
+    (psession--selected-frame-parameters . "psession-selected-frame-parameters.el"))
   "Alist of vars to save persistently.
 It is composed of (var_name . \"var_name.el\").
 Where \"var_name.el\" is the file where to save value of 'var_name.
@@ -147,6 +149,10 @@ That may not work with Emacs versions <=23.1 for hash tables."
              (cond ((and (eq o 'register-alist)
                          (symbol-value o))
                     (psession--dump-object-save-register-alist f skip-props))
+                   ;; FIXME: Perhaps delete saved compiled file with
+                   ;; nil value to avoid restoring old non nil value later.
+                   ;; ((and (boundp o) (null (symbol-value o)) (file-exists-p (concat abs "c")))
+                   ;;  (delete-file abs))
                    ((and (boundp o) (symbol-value o))
                     (psession--dump-object-no-properties o abs skip-props))))))
 
@@ -267,6 +273,22 @@ Arg CONF is an entry in `psession--winconf-alist'."
     (run-with-idle-timer
      0.01 nil (lambda ()
                 (psession--restore-winconf-1 psession--last-winconf nil 'safe)))))
+
+;;; Tabs and current frame settings
+;;
+;;
+(defvar psession--selected-frame-parameters nil)
+
+(defun psession-save-frame-tabs ()
+  (unless (and (boundp 'tab-bar-mode) tab-bar-mode)
+    (set-frame-parameter (selected-frame) 'tabs nil))
+  (setq psession--selected-frame-parameters
+        (frameset-save (list (selected-frame)))))
+
+(defun psession-restore-frame-tabs ()
+  (when (frameset-valid-p psession--selected-frame-parameters)
+    (frameset-restore psession--selected-frame-parameters :reuse-frames t)))
+
 
 ;;; Persistents-buffer 
 ;;
@@ -375,7 +397,7 @@ Arg CONF is an entry in `psession--winconf-alist'."
 
 ;;;###autoload
 (define-minor-mode psession-mode
-    "Persistent emacs sessions."
+  "Persistent emacs sessions."
   :global t
   (if psession-mode
       (progn
@@ -387,13 +409,19 @@ Arg CONF is an entry in `psession--winconf-alist'."
         (add-hook 'emacs-startup-hook 'psession--restore-some-buffers 'append)
         (add-hook 'kill-emacs-hook 'psession-save-last-winconf)
         (add-hook 'emacs-startup-hook 'psession-restore-last-winconf 'append)
+        (when (fboundp 'tab-bar-mode)
+          (add-hook 'kill-emacs-hook 'psession-save-frame-tabs)
+          (add-hook 'emacs-startup-hook 'psession-restore-frame-tabs 'append))
         (add-hook 'kill-emacs-hook 'psession-auto-save-cancel-timer))
     (remove-hook 'kill-emacs-hook 'psession--dump-object-to-file-save-alist)
     (remove-hook 'emacs-startup-hook 'psession--restore-objects-from-directory)
     (remove-hook 'kill-emacs-hook 'psession--dump-some-buffers-to-list)
     (remove-hook 'emacs-startup-hook 'psession--restore-some-buffers)
     (remove-hook 'kill-emacs-hook 'psession-save-last-winconf)
-    (remove-hook 'emacs-startup-hook 'psession-restore-last-winconf)))
+    (remove-hook 'emacs-startup-hook 'psession-restore-last-winconf)
+    (when (fboundp 'tab-bar-mode)
+      (remove-hook 'kill-emacs-hook 'psession-save-frame-tabs)
+      (remove-hook 'emacs-startup-hook 'psession-restore-frame-tabs))))
 
 
 (provide 'psession)
