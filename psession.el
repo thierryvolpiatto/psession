@@ -287,7 +287,9 @@ Arg CONF is an entry in `psession--winconf-alist'."
 
 (defun psession-restore-frame-tabs ()
   (when (frameset-valid-p psession--selected-frame-parameters)
-    (frameset-restore psession--selected-frame-parameters :reuse-frames t)))
+    (frameset-restore psession--selected-frame-parameters :reuse-frames t))
+  (when (frame-parameter (selected-frame) 'tabs)
+    (tab-bar-mode 1)))
 
 
 ;;; Persistents-buffer 
