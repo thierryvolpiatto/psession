@@ -144,15 +144,17 @@ That may not work with Emacs versions <=23.1 for hash tables."
   (when psession-object-to-save-alist
     (cl-loop for (o . f) in psession-object-to-save-alist
              for abs = (expand-file-name f psession-elisp-objects-default-directory)
+             for compfile = (concat abs "c")
              ;; Registers and kill-ring are treated specially.
              do
              (cond ((and (eq o 'register-alist)
                          (symbol-value o))
                     (psession--dump-object-save-register-alist f skip-props))
-                   ;; FIXME: Perhaps delete saved compiled file with
+                   ;; Delete saved compiled file with
                    ;; nil value to avoid restoring old non nil value later.
-                   ;; ((and (boundp o) (null (symbol-value o)) (file-exists-p (concat abs "c")))
-                   ;;  (delete-file abs))
+                   ((and (boundp o) (null (symbol-value o))
+                         (file-exists-p compfile))
+                    (delete-file compfile))
                    ((and (boundp o) (symbol-value o))
                     (psession--dump-object-no-properties o abs skip-props))))))
 
@@ -283,7 +285,8 @@ Arg CONF is an entry in `psession--winconf-alist'."
   (unless (and (boundp 'tab-bar-mode) tab-bar-mode)
     (set-frame-parameter (selected-frame) 'tabs nil))
   (setq psession--selected-frame-parameters
-        (frameset-save (list (selected-frame)))))
+        (and tab-bar-mode
+             (frameset-save (list (selected-frame))))))
 
 (defun psession-restore-frame-tabs ()
   (when (frameset-valid-p psession--selected-frame-parameters)
