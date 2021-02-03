@@ -282,10 +282,9 @@ Arg CONF is an entry in `psession--winconf-alist'."
 (defvar psession--selected-frame-parameters nil)
 
 (defun psession-save-frame-tabs ()
-  (unless (and (boundp 'tab-bar-mode) tab-bar-mode)
-    (set-frame-parameter (selected-frame) 'tabs nil))
   (setq psession--selected-frame-parameters
-        (and tab-bar-mode
+        (and (boundp 'tab-bar-mode)
+             tab-bar-mode
              (frameset-save (list (selected-frame))
                             :app 'psession))))
 
