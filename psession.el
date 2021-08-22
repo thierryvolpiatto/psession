@@ -28,6 +28,7 @@
 (require 'frameset)
 
 (defvar dired-buffers)
+(defvar helm-comp-read-use-marked)
 
 
 (defgroup psession nil
@@ -260,11 +261,15 @@ Arg CONF is an entry in `psession--winconf-alist'."
 ;;;###autoload
 (defun psession-delete-winconf (conf)
   "Delete window config CONF from `psession--winconf-alist'."
-  (interactive (list (completing-read
-                      "WinConfig: "
-                      (sort (mapcar 'car psession--winconf-alist) #'string-lessp))))
-  (let ((assoc (assoc conf psession--winconf-alist)))
-    (setq psession--winconf-alist (delete assoc psession--winconf-alist))))
+  (interactive (list (let ((helm-comp-read-use-marked t))
+                       (completing-read
+                        "WinConfig: "
+                        (sort (mapcar 'car psession--winconf-alist) #'string-lessp)))))
+  (when (stringp conf)
+    (setq conf (list conf)))
+  (cl-loop for cfg in conf
+           for assoc = (assoc cfg psession--winconf-alist)
+           do (setq psession--winconf-alist (delete assoc psession--winconf-alist))))
 
 (defun psession-save-last-winconf ()
   (unless (and (boundp 'helm-alive-p) helm-alive-p)
