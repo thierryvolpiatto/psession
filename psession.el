@@ -143,6 +143,8 @@ That may not work with Emacs versions <=23.1 for hash tables."
 ;;
 (defun psession--dump-object-to-file-save-alist (&optional skip-props)
   (when psession-object-to-save-alist
+    ;; Ensure `psession-elisp-objects-default-directory' is clean.
+    (psession-cleanup-dir)
     (cl-loop for (o . f) in psession-object-to-save-alist
              for abs = (expand-file-name f psession-elisp-objects-default-directory)
              for compfile = (concat abs "c")
@@ -158,6 +160,16 @@ That may not work with Emacs versions <=23.1 for hash tables."
                     (delete-file compfile))
                    ((and (boundp o) (symbol-value o))
                     (psession--dump-object-no-properties o abs skip-props))))))
+
+(defun psession-cleanup-dir ()
+  (let ((files (directory-files psession-elisp-objects-default-directory t "\\.el$")))
+    (when files
+      (if (y-or-n-p (format "%s is not clean, cleanup ? "
+                            psession-elisp-objects-default-directory))
+          (cl-loop for f in files
+                   do (delete-file f))
+        (error "Psession aborted, *.el files found in '%s' please remove them"
+               psession-elisp-objects-default-directory)))))
 
 (cl-defun psession--restore-objects-from-directory
     (&optional (dir psession-elisp-objects-default-directory))
