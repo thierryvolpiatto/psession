@@ -67,7 +67,7 @@ have to add here the `minibuffer-history' variables, instead enable
   :type '(alist :key-type symbol :value-type string))
 
 (defcustom psession-save-buffers-unwanted-buffers-regexp
-  ".*[.]org$\\|diary$\\|[.]newsticker-cache$"
+  "\\(\\.org\\|diary\\|\\.jpg\\|\\.png\\|\\*image-native-display\\*\\)$"
   "Regexp matching buffers you don't want to save."
   :group 'psession
   :type 'string)
