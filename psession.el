@@ -173,8 +173,13 @@ That may not work with Emacs versions <=23.1 for hash tables."
 
 (cl-defun psession--restore-objects-from-directory
     (&optional (dir psession-elisp-objects-default-directory))
-  (let ((file-list (directory-files dir t directory-files-no-dot-files-regexp)))
-    (cl-loop for file in file-list do (and file (load file)))))
+  (let ((file-list (directory-files dir t "\\.elc?")))
+    ;; If system or Emacs crash we may still have some *.el files
+    ;; around, if so delete them (rare but may happen).
+    (cl-loop for file in file-list
+             if (and file (string-match "\\.elc\\'" file))
+             do (load file)
+             else do (delete-file file))))
 
 (defun psession--purecopy (object)
   (cond ((stringp object)
