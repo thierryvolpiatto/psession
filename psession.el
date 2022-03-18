@@ -29,6 +29,7 @@
 
 (defvar dired-buffers)
 (defvar helm-comp-read-use-marked)
+(defvar print-symbols-bare)
 
 
 (defgroup psession nil
@@ -131,7 +132,9 @@ That may not work with Emacs versions <=23.1 for hash tables."
              (print-level            nil)
              (print-circle           t)
              (print-escape-nonascii  t)
-             (print-escape-multibyte t))
+             (print-escape-multibyte t)
+             ;; No symbol's position.
+             (print-symbols-bare     t))
          (with-temp-file file
            (prin1 `(setq-default ,obj (eval-when-compile ,obj)) (current-buffer)))
          (byte-compile-file file)
