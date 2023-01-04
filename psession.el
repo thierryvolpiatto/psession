@@ -176,13 +176,16 @@ That may not work with Emacs versions <=23.1 for hash tables."
 
 (cl-defun psession--restore-objects-from-directory
     (&optional (dir psession-elisp-objects-default-directory))
-  (let ((file-list (directory-files dir t "\\.elc?")))
+  (let ((file-list (directory-files dir t "\\.elc?"))
+        (time (current-time)))
     ;; If system or Emacs crash we may still have some *.el files
     ;; around, if so delete them (rare but may happen).
     (cl-loop for file in file-list
              if (and file (string-match "\\.elc\\'" file))
              do (load file)
-             else do (delete-file file))))
+             else do (delete-file file))
+    (message "Psession restored objects in %.2f seconds"
+             (float-time (time-subtract (current-time) time)))))
 
 (defun psession--purecopy (object)
   (cond ((stringp object)
@@ -349,7 +352,8 @@ Arg CONF is an entry in `psession--winconf-alist'."
 (defun psession--restore-some-buffers ()
   (when psession--save-buffers-alist
     (let* ((max (length psession--save-buffers-alist))
-           (progress-reporter (make-progress-reporter "Restoring buffers..." 0 max)))
+           (progress-reporter (make-progress-reporter "Restoring buffers..." 0 max))
+           (time (current-time)))
       (cl-loop for (f . p) in psession--save-buffers-alist
                for count from 0
                do
@@ -357,7 +361,9 @@ Arg CONF is an entry in `psession--winconf-alist'."
                  (goto-char p)
                  (push-mark p 'nomsg)
                  (progress-reporter-update progress-reporter count)))
-      (progress-reporter-done progress-reporter))))
+      (progress-reporter-done progress-reporter)
+      (message "Buffers restored in %.2f seconds"
+               (float-time (time-subtract (current-time) time))))))
 
 (defun psession-savehist-hook ()
   (unless (or (eq minibuffer-history-variable t)
