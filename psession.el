@@ -1,7 +1,7 @@
 ;;; psession.el --- Persistent save of elisp objects. -*- lexical-binding: t -*-
 
 ;; Author: Thierry Volpiatto <thierry.volpiatto@gmail.com>
-;; Copyright (C) 2010~2022 Thierry Volpiatto, all rights reserved.
+;; Copyright (C) 2010~2023 Thierry Volpiatto, all rights reserved.
 ;; X-URL: https://github.com/thierryvolpiatto/psession
 
 ;; Compatibility: GNU Emacs 24.1+
