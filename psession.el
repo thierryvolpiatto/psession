@@ -101,9 +101,9 @@ if called from elisp in e.g. -your init file- you don't need to specify
 SAVE arg."
   (interactive (list (intern
                       (completing-read "Make persistent variable: "
-                                       (cl-loop for s being the symbols
-                                                when (boundp s)
-                                                collect s)))
+                                       obarray
+                                       #'boundp
+                                       t nil nil (thing-at-point 'symbol)))
                      "\np"))
   (cl-assert (and var (boundp var)))
   (cl-pushnew (cons var (format "%s.el" var))
