@@ -59,7 +59,7 @@
     (psession--selected-frame-parameters . "psession-selected-frame-parameters.el"))
   "Alist of vars to save persistently.
 It is composed of (var_name . \"var_name.el\").
-Where \"var_name.el\" is the file where to save value of 'var_name.
+Where \"var_name.el\" is the file where to save value of var_name.
 
 These variables are saved when `psession-mode' is enabled, you don't
 have to add here the `minibuffer-history' variables, instead enable
