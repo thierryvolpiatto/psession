@@ -232,7 +232,9 @@ That may not work with Emacs versions <=23.1 for hash tables."
                                  for val = (if e27 (registerv-data rval) rval)
                                  unless (or (markerp val)
                                             (vectorp val)
-                                            (and (consp val) (window-configuration-p (car val))))
+                                            (and (consp val) (window-configuration-p (car val)))
+                                            (frame-configuration-p val)
+                                            (frameset-register-p val))
                                  collect (cons char (if (stringp val)
                                                         (if e27
                                                             (registerv-make (substring-no-properties val))
