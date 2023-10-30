@@ -227,19 +227,26 @@ That may not work with Emacs versions <=23.1 for hash tables."
 (cl-defun psession--dump-object-save-register-alist (&optional (file "register-alist.el") skip-props)
   "Save `register-alist' but only supported objects."
   (let ((register-alist (cl-loop for (char . rval) in register-alist
+                                 ;; FIXME: Don't know why I have to
+                                 ;; handle this, AFAIK registerv
+                                 ;; objects are not writable isn't it?
                                  for e27 = (and (fboundp 'registerv-p)
                                                 (registerv-p rval))
-                                 for val = (if e27 (registerv-data rval) rval)
-                                 unless (or (markerp val)
-                                            (vectorp val)
+                                 for val = (cond (e27 (registerv-data rval))
+                                                 ((markerp rval)
+                                                  (list 'file-query
+                                                        (buffer-file-name (marker-buffer rval))
+                                                        (marker-position rval)))
+                                                 (t rval))
+                                 unless (or (vectorp val)
                                             (and (consp val) (window-configuration-p (car val)))
                                             (frame-configuration-p val)
                                             (frameset-register-p val))
-                                 collect (cons char (if (stringp val)
-                                                        (if e27
-                                                            (registerv-make (substring-no-properties val))
-                                                          (substring-no-properties val))
-                                                      rval))))
+                                 collect (cons char (cond ((and (stringp val) e27)
+                                                           (registerv-make (substring-no-properties val)))
+                                                          ((stringp val)
+                                                           (substring-no-properties val))
+                                                          (t val)))))
         (def-file (expand-file-name file psession-elisp-objects-default-directory)))
     (psession--dump-object-no-properties 'register-alist def-file skip-props)))
 
