@@ -136,6 +136,7 @@ That may not work with Emacs versions <=23.1 for hash tables."
              ;; No symbol's position.
              (print-symbols-bare     t))
          (with-temp-file file
+           (insert ";;; -*- lexical-binding: t -*-\n")
            (prin1 `(setq-default ,obj (eval-when-compile ,obj)) (current-buffer)))
          (byte-compile-file file)
          (message "`%s' dumped to %sc" obj file))
