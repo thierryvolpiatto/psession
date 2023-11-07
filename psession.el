@@ -228,9 +228,6 @@ That may not work with Emacs versions <=23.1 for hash tables."
 (cl-defun psession--dump-object-save-register-alist (&optional (file "register-alist.el") skip-props)
   "Save `register-alist' but only supported objects."
   (let ((register-alist (cl-loop for (char . rval) in register-alist
-                                 ;; FIXME: Don't know why I have to
-                                 ;; handle this, AFAIK registerv
-                                 ;; objects are not writable isn't it?
                                  for e27 = (and (fboundp 'registerv-p)
                                                 (registerv-p rval))
                                  for val = (cond (e27 (registerv-data rval))
@@ -243,9 +240,7 @@ That may not work with Emacs versions <=23.1 for hash tables."
                                             (and (consp val) (window-configuration-p (car val)))
                                             (frame-configuration-p val)
                                             (frameset-register-p val))
-                                 collect (cons char (cond ((and (stringp val) e27)
-                                                           (registerv-make (substring-no-properties val)))
-                                                          ((stringp val)
+                                 collect (cons char (cond ((stringp val)
                                                            (substring-no-properties val))
                                                           (t val)))))
         (def-file (expand-file-name file psession-elisp-objects-default-directory)))
