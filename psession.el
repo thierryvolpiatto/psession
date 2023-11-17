@@ -166,11 +166,16 @@ That may not work with Emacs versions <=23.1 for hash tables."
                    ((and (boundp o) (symbol-value o))
                     (psession--dump-object-no-properties o abs skip-props))))))
 
-(defun psession-cleanup-dir ()
+(defun psession-cleanup-dir (&optional arg)
+  "Delete \"*.el\" files in `psession-elisp-objects-default-directory'.
+When ARG is non nil (called interactively) ask before deleting. "
+  (interactive "p")
   (let ((files (directory-files psession-elisp-objects-default-directory t "\\.el$")))
     (when files
-      (if (y-or-n-p (format "%s is not clean, cleanup ? "
-                            psession-elisp-objects-default-directory))
+      ;; When not interactive, delete files inconditionally (bug#18).
+      (if (or (null arg)
+              (y-or-n-p (format "%s is not clean, cleanup ? "
+                                psession-elisp-objects-default-directory)))
           (cl-loop for f in files
                    do (delete-file f))
         (error "Psession aborted, *.el files found in '%s' please remove them"
