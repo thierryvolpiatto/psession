@@ -388,6 +388,7 @@ Arg CONF is an entry in `psession--winconf-alist'."
 (define-minor-mode psession-savehist-mode
     "Save minibuffer-history variables persistently."
   :global t
+  (when savehist-mode (savehist-mode -1))
   (if psession-savehist-mode
       (add-hook 'minibuffer-setup-hook 'psession-savehist-hook)
     (remove-hook 'minibuffer-setup-hook 'psession-savehist-hook)))
