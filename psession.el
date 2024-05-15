@@ -113,6 +113,28 @@ SAVE arg."
     (customize-save-variable 'psession-object-to-save-alist
                              psession-object-to-save-alist)))
 
+;;;###autoload
+(defun psession-remove-persistent-variable (var &optional save)
+  "Make symbol variable VAR no more persistent.
+
+When used interactively or SAVE is non nil, remove VAR from
+`psession-object-to-save-alist' with customize."
+  (interactive (list (intern
+                      (completing-read "Make persistent variable: "
+                                       obarray
+                                       #'boundp
+                                       nil nil nil (thing-at-point 'symbol)))
+                     "\np"))
+  (let ((file (format "%s.elc" var)))
+    (when (and (file-exists-p file)
+               (assoc var psession-object-to-save-alist))
+      (setq psession-object-to-save-alist
+            (delete (assoc var psession-object-to-save-alist)
+                    psession-object-to-save-alist))
+      (delete-file file)
+      (when save
+        (customize-save-variable 'psession-object-to-save-alist
+                                 psession-object-to-save-alist)))))
 
 ;;; The main function to save objects to byte compiled file.
 ;;
@@ -415,6 +437,7 @@ Arg CONF is an entry in `psession--winconf-alist'."
       (add-to-list 'load-path
                    ,(file-name-directory (locate-library "psession")))
       (require 'psession)
+      ;; (setq create-lockfiles nil)
       ;; Inject variables without properties.
       ,(async-inject-variables (format "\\`%s" (psession--get-variables-regexp))
                                nil nil 'noprops)
