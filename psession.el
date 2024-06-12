@@ -357,7 +357,7 @@ Arg CONF is an entry in `psession--winconf-alist'."
     (tab-bar-mode 1)))
 
 
-;;; Persistents-buffer 
+;;; Persistent-buffers
 ;;
 ;;
 (defun psession--save-some-buffers ()
@@ -398,6 +398,10 @@ Arg CONF is an entry in `psession--winconf-alist'."
       (message "Buffers restored in %.2f seconds"
                (float-time (time-subtract (current-time) time))))))
 
+
+;;; Save history
+;;
+(defvar psession--old-savehist-mode-state nil)
 (defun psession-savehist-hook ()
   (unless (or (eq minibuffer-history-variable t)
               (memq minibuffer-history-variable psession-savehist-ignored-variables))
@@ -410,10 +414,13 @@ Arg CONF is an entry in `psession--winconf-alist'."
 (define-minor-mode psession-savehist-mode
     "Save minibuffer-history variables persistently."
   :global t
-  (when savehist-mode (savehist-mode -1))
   (if psession-savehist-mode
-      (add-hook 'minibuffer-setup-hook 'psession-savehist-hook)
-    (remove-hook 'minibuffer-setup-hook 'psession-savehist-hook)))
+      (progn
+        (setq psession--old-savehist-mode-state (if savehist-mode 1 -1))
+        (and savehist-mode (savehist-mode -1))
+        (add-hook 'minibuffer-setup-hook 'psession-savehist-hook))
+    (remove-hook 'minibuffer-setup-hook 'psession-savehist-hook)
+    (savehist-mode psession--old-savehist-mode-state)))
 
 
 ;;; Auto saving psession
