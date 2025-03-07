@@ -31,6 +31,7 @@
 (defvar dired-buffers)
 (defvar helm-comp-read-use-marked)
 (defvar print-symbols-bare)
+(defvar helm-comp-read-use-marked)
 
 
 (defgroup psession nil
@@ -115,27 +116,44 @@ SAVE arg."
                              psession-object-to-save-alist)))
 
 ;;;###autoload
-(defun psession-remove-persistent-variable (var &optional save)
-  "Make symbol variable VAR no more persistent.
+(defun psession-remove-persistent-variables (vars &optional save)
+  "Make variables VARS no more persistent.
 
 When used interactively or SAVE is non nil, remove VAR from
-`psession-object-to-save-alist' with customize."
-  (interactive (list (intern
-                      (completing-read "Make persistent variable: "
-                                       obarray
-                                       #'boundp
-                                       nil nil nil (thing-at-point 'symbol)))
+`psession-object-to-save-alist' persistently."
+  (interactive (list (if (bound-and-true-p helm-mode)
+                         (let ((helm-comp-read-use-marked t))
+                           (completing-read
+                            "Remove persistent variable(s): "
+                            (mapcar #'car psession-object-to-save-alist)))
+                       (completing-read-multiple
+                        "Remove persistent variable(s): "
+                        (mapcar #'car psession-object-to-save-alist)))
                      "\np"))
-  (let ((file (format "%s.elc" var)))
-    (when (and (file-exists-p file)
-               (assoc var psession-object-to-save-alist))
+  (cl-loop for v in vars
+           for var = (if (stringp v) (intern v) v)
+           do (psession-remove-persistent-variable var))
+  (when save
+    (customize-save-variable 'psession-object-to-save-alist
+                             psession-object-to-save-alist)))
+
+(defun psession-remove-persistent-variable (var &optional save)
+  "Make variable VAR no more persistent.
+
+When SAVE is no nil, remove VAR from `psession-object-to-save-alist'
+persistently."
+  (let ((file (expand-file-name
+               (format "%s.elc" var)
+               psession-elisp-objects-default-directory)))
+    (when (file-exists-p file)
+      (delete-file file))
+    (when (assq var psession-object-to-save-alist)
       (setq psession-object-to-save-alist
-            (delete (assoc var psession-object-to-save-alist)
-                    psession-object-to-save-alist))
-      (delete-file file)
-      (when save
-        (customize-save-variable 'psession-object-to-save-alist
-                                 psession-object-to-save-alist)))))
+            (delete (assq var psession-object-to-save-alist)
+                    psession-object-to-save-alist)))
+    (when save
+      (customize-save-variable 'psession-object-to-save-alist
+                               psession-object-to-save-alist))))
 
 ;;; The main function to save objects to byte compiled file.
 ;;
